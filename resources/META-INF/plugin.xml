@@ -2,7 +2,7 @@
   <id>com.your.company.unique.plugin.id</id>
   <name>GenerateEnumValueOf</name>
   <version>1.0</version>
-  <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+  <vendor email="hilin2333@gmail.com" url="https://github.com/hilin2333/EnumValueOfPlugin">YourCompany</vendor>
 
   <resource-bundle>silencecorner.intellij.plugin.evo.Resources</resource-bundle>
 
