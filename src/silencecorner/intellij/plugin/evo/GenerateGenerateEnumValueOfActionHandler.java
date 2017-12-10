@@ -8,9 +8,13 @@ import com.intellij.openapi.editor.actionSystem.EditorWriteActionHandler;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Test;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GenerateGenerateEnumValueOfActionHandler extends EditorWriteActionHandler {
-
+    private static final Pattern pattern = Pattern.compile("\\(.*\\)");
     @Override
     public void executeWriteAction(final Editor editor, @Nullable Caret caret, final DataContext dataContext) {
 
@@ -31,7 +35,7 @@ public class GenerateGenerateEnumValueOfActionHandler extends EditorWriteActionH
                 PsiExpression[] psiExpressions =  ((PsiEnumConstant) field).getArgumentList().getExpressions();
 
                 switchBlock.getBody().add(psiElementFactory.createStatementFromText(
-                        "case " + psiExpressions[0].getText() + ":\n"
+                        "case " + getCase(psiExpressions[0].getText()) + ":\n"
                         ,
                         null));
 
@@ -48,5 +52,12 @@ public class GenerateGenerateEnumValueOfActionHandler extends EditorWriteActionH
         PsiElement psiElement = styleManager.reformat(switchBlock);
         psiMethod.getBody().add(psiElement);
         clazz.add(psiMethod);
+    }
+    public String getCase(String text){
+        Matcher m = pattern.matcher(text);
+        while (m.find()) {
+            return text.replace(m.group(0),"");
+        }
+        return text;
     }
 }
