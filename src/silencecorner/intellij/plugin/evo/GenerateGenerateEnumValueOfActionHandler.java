@@ -43,7 +43,7 @@ public class GenerateGenerateEnumValueOfActionHandler extends EditorWriteActionH
 
         }
         switchBlock.getBody().add(psiElementFactory.createStatementFromText("default:\n", switchBlock));
-        switchBlock.getBody().add(psiElementFactory.createStatementFromText("throw new RuntimeException(\"invalid  " + psiParameter.getName() + "for enum " + clazz.getName() + "\");",switchBlock));
+        switchBlock.getBody().add(psiElementFactory.createStatementFromText("throw new RuntimeException(\"invalid  " + psiParameter.getName() + " for enum " + clazz.getName() + "\");",switchBlock));
         CodeStyleManager styleManager = CodeStyleManager.getInstance(editor.getProject());
         PsiElement psiElement = styleManager.reformat(switchBlock);
         psiMethod.getBody().add(psiElement);
