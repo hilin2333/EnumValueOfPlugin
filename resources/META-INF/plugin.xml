@@ -1,19 +1,21 @@
 <idea-plugin>
+  <!--ID，不解释，这个上传到idea官方才有用-->
   <id>com.your.company.unique.plugin.id</id>
   <name>GenerateEnumValueOf</name>
   <version>1.0</version>
+  <!--作者信息-->
   <vendor email="hilin2333@gmail.com" url="https://github.com/hilin2333/EnumValueOfPlugin">YourCompany</vendor>
-
+  <!--在alt + insert/n 中是文字和以及描述信息-->
   <resource-bundle>silencecorner.intellij.plugin.evo.Resources</resource-bundle>
-
+  <!--在安装时的信息-->
   <description><![CDATA[
       generate enum valueOf method by key property<br>
       <em>generate enum valueOf method by key property</em>
     ]]></description>
-
+  <!--版本号-->
   <change-notes><![CDATA[
-      first version<br>
-      <em>first version</em>
+      1.0-release<br>
+      <em>1.0-release</em>
     ]]>
   </change-notes>
 
@@ -31,12 +33,16 @@
   </extensions>
   <application-components>
     <!-- Add your application components here -->
+    <!--组件声明-->
     <component>
       <implementation-class>silencecorner.intellij.plugin.evo.PsiHelper</implementation-class>
     </component>
   </application-components>
   <actions>
+    <!--动作声明，这个类是要继承一个xxAction类的-->
     <action class="silencecorner.intellij.plugin.evo.GenerateEnumValueOf" id="GenerateEnumValueOf">
+      <!--指定menu是哪个，前面的alt + insert/n就是generate的快捷键，anchor指定位置时候最后一个-->
+      <!--也可以用指定在某一项的后面：anchor="after" relative-to-action="GenerateSetter"-->
       <add-to-group group-id="GenerateGroup" anchor="last"/>
     </action>
 
