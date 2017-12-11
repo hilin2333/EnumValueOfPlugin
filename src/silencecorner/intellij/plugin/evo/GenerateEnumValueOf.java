@@ -29,7 +29,10 @@ public class GenerateEnumValueOf extends EditorAction {
         }
         PsiClass javaClass = util.getCurrentClass(editor);
         //设置enum可访问,且只有一个构造函数,且构造有至少一个参数
-        if (javaClass.isEnum() && javaClass.getConstructors().length == 1
+        if (javaClass != null
+                && javaClass.isEnum()
+                && javaClass.getConstructors() != null
+                && javaClass.getConstructors().length == 1
                 && javaClass.getConstructors()[0].getParameterList().getParameters().length > 0) {
             presentation.setVisible(true);
             return;

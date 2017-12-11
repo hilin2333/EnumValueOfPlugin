@@ -20,7 +20,7 @@ public class GenerateGenerateEnumValueOfActionHandler extends EditorWriteActionH
         PsiElementFactory psiElementFactory = psiFacade.getElementFactory();
         PsiClass clazz = util.getCurrentClass(editor);
         PsiParameter psiParameter = clazz.getConstructors()[0].getParameterList().getParameters()[0];
-        PsiMethod psiMethod = psiElementFactory.createMethodFromText("public  static" + clazz.getName() +" valueOf(" + psiParameter.getType().getPresentableText() +  " " + psiParameter.getName() +") {}",null);
+        PsiMethod psiMethod = psiElementFactory.createMethodFromText("public " + clazz.getName() +" valueOf(" + psiParameter.getType().getPresentableText() +  " " + psiParameter.getName() +") {}",null);
 
         //创建switch case语句
         String text = "switch (" + psiParameter.getName() + ") {}";
