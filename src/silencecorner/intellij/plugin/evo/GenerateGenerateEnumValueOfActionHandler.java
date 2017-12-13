@@ -6,8 +6,12 @@ import com.intellij.openapi.editor.Caret;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.actionSystem.EditorWriteActionHandler;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.Comparing;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
+import com.intellij.psi.util.PsiUtil;
+import com.intellij.psi.util.TypeConversionUtil;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Matcher;
@@ -21,19 +25,23 @@ public class GenerateGenerateEnumValueOfActionHandler extends EditorWriteActionH
         PsiHelper util = ApplicationManager.getApplication().getComponent(PsiHelper.class);
         JavaPsiFacade psiFacade = JavaPsiFacade.getInstance(editor.getProject());
         PsiElementFactory psiElementFactory = psiFacade.getElementFactory();
+
         PsiClass clazz = util.getCurrentClass(editor);
         PsiParameter psiParameter = clazz.getConstructors()[0].getParameterList().getParameters()[0];
+        if (!check(psiParameter.getType())){
+            showMsg(editor);
+            return;
+        }
+        //删除已存在valueOf方法
+        PsiMethod[] psiMethods = clazz.findMethodsByName("valueOf",false);
+        for (PsiMethod method : psiMethods){
+            method.delete();
+        }
         PsiMethod psiMethod = psiElementFactory.createMethodFromText("public static " + clazz.getName() +" valueOf(" + psiParameter.getType().getPresentableText() +  " " + psiParameter.getName() +") {}",null);
         //创建switch case语句
         String text = "switch (" + psiParameter.getName() + ") {}";
         PsiSwitchStatement switchBlock = (PsiSwitchStatement)psiElementFactory.createStatementFromText(text, clazz);
-        //不能使用switch分支的类型弹出详细框
-        if (switchBlock.isValid()){
-            Messages.showMessageDialog(editor.getProject(),
-                    "the first of enum constructor parameter can't be used by switch", "occur an error",
-                    Messages.getErrorIcon());
-            return;
-        }
+        int i = 0;
         for (PsiField field : clazz.getFields()) {
             if (field instanceof PsiEnumConstant) {
                 String fieldName = field.getName();
@@ -54,12 +62,6 @@ public class GenerateGenerateEnumValueOfActionHandler extends EditorWriteActionH
         CodeStyleManager styleManager = CodeStyleManager.getInstance(editor.getProject());
         PsiElement psiElement = styleManager.reformat(switchBlock);
         psiMethod.getBody().add(psiElement);
-        if (psiMethod.isValid()){
-            Messages.showMessageDialog(editor.getProject(),
-                    "method invalid:\n" + psiMethod.getText(), "occur an error",
-                    Messages.getErrorIcon());
-            return;
-        }
         clazz.add(psiMethod);
     }
     public String getCase(String text){
@@ -68,5 +70,41 @@ public class GenerateGenerateEnumValueOfActionHandler extends EditorWriteActionH
             return text.replace(m.group(0),"");
         }
         return text;
+    }
+    private enum SelectorKind {
+        INT, ENUM, STRING
+    }
+
+    private static SelectorKind getSwitchSelectorKind(@NotNull PsiType type) {
+        if (TypeConversionUtil.getTypeRank(type) <= TypeConversionUtil.INT_RANK) {
+            return SelectorKind.INT;//这里指定的是整形
+        }
+
+        PsiClass psiClass = PsiUtil.resolveClassInClassTypeOnly(type);
+        if (psiClass != null) {
+            if (psiClass.isEnum()) {
+                return SelectorKind.ENUM;
+            }
+            if (Comparing.strEqual(psiClass.getQualifiedName(), CommonClassNames.JAVA_LANG_STRING)) {
+                return SelectorKind.STRING;
+            }
+        }
+
+        return null;
+    }
+    private boolean check(PsiType psiType){
+        boolean flag = false;
+        for (SelectorKind kind : SelectorKind.values()){
+            if (kind.equals(getSwitchSelectorKind(psiType))){
+                flag = true;
+                break;
+            }
+        }
+        return flag;
+    }
+    private void  showMsg(Editor editor){
+        Messages.showMessageDialog(editor.getProject(),
+                "the first of enum constructor parameter can't be used for switch", "occur an error",
+                Messages.getWarningIcon());
     }
 }
