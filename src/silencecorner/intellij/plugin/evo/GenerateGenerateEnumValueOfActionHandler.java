@@ -30,6 +30,7 @@ public class GenerateGenerateEnumValueOfActionHandler extends EditorWriteActionH
             compareText += "== %s";
             paramType = psiParameter.getType().getPresentableText();
         }else{
+            //这里可能是封装类和其他类型，封装类的在超过byte范围必须用equals比较
             equalCondition = "if(" + psiParameter.getName() +" != null){%s}";
             compareText += ".equals(%s)";
             paramType = psiParameter.getType().getPresentableText().substring(0,1).toUpperCase() + psiParameter.getType().getPresentableText().substring(1);
