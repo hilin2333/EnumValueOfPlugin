@@ -21,19 +21,18 @@ public class GenerateGenerateEnumValueOfActionHandler extends EditorWriteActionH
 
         PsiClass clazz = util.getCurrentClass(editor);
         PsiParameter psiParameter = clazz.getConstructors()[0].getParameterList().getParameters()[0];
-        String compareText;
-        if (TypeConversionUtil.getTypeRank(psiParameter.getType()) <= TypeConversionUtil.INT_RANK) {
-            compareText = "== %s";
+        String compareText = psiParameter.getName();
+        String equalCondition = null;
+        String paramType;
+        if (TypeConversionUtil.getTypeRank(psiParameter.getType()) <= TypeConversionUtil.INT_RANK
+                && psiParameter.getType().getPresentableText()
+                .equals(psiParameter.getType().getPresentableText().toLowerCase())) {
+            compareText += "== %s";
+            paramType = psiParameter.getType().getPresentableText();
         }else{
-            if (psiParameter.getType().getPresentableText()
-                    .equals(psiParameter.getType().getPresentableText().toLowerCase())){
-                Messages.showMessageDialog(editor.getProject(),
-                        "constructor parameter type long float double must be Long Float Double",
-                        "type error ",
-                        Messages.getWarningIcon());
-                return;
-            }
-            compareText = ".equal(%s)";
+            equalCondition = "if(" + psiParameter.getName() +" != null){%s}";
+            compareText += ".equals(%s)";
+            paramType = psiParameter.getType().getPresentableText().substring(0,1).toUpperCase() + psiParameter.getType().getPresentableText().substring(1);
         }
         String strGetMthod = "get" + psiParameter.getName().substring(0,1).toUpperCase() + psiParameter.getName().substring(1);
         if (clazz.findMethodsByName(strGetMthod,false).length < 1){
@@ -50,12 +49,12 @@ public class GenerateGenerateEnumValueOfActionHandler extends EditorWriteActionH
             method.delete();
         }
 
-        PsiMethod psiMethod = psiElementFactory.createMethodFromText("public static " + clazz.getName() +" valueOf(" + psiParameter.getType().getPresentableText() +  " " + psiParameter.getName() +") {}",null);
+        PsiMethod psiMethod = psiElementFactory.createMethodFromText("public static " + clazz.getName() +" valueOf(" + paramType +  " " + psiParameter.getName() +") {}",null);
 
         //创建foreach语句
         String text = "for("+ clazz.getName() + " " + clazz.getName().toLowerCase() + ":" + clazz.getName() + ".values()){"
-                    + "if (" + clazz.getName().toLowerCase() + "." + strGetMthod + "()" + String.format(compareText,psiParameter.getName())  +"){return " + clazz.getName().toLowerCase() +";}}";
-        psiMethod.getBody().add(psiElementFactory.createStatementFromText(text, null));
+                    + "if (" +  String.format(compareText,clazz.getName().toLowerCase() + "." + strGetMthod + "()")  +"){return " + clazz.getName().toLowerCase() +";}}";
+        psiMethod.getBody().add(psiElementFactory.createStatementFromText(equalCondition == null ? text : String.format(equalCondition,text), null));
         psiMethod.getBody().add(psiElementFactory.createStatementFromText("return null;", null));
         CodeStyleManager styleManager = CodeStyleManager.getInstance(editor.getProject());
         PsiElement psiElement = styleManager.reformat(psiMethod);
