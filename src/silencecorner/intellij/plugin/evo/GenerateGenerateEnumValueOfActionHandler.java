@@ -45,12 +45,12 @@ public class GenerateGenerateEnumValueOfActionHandler extends EditorWriteActionH
         }
 
         //删除已存在valueOf方法
-        PsiMethod[] psiMethods = clazz.findMethodsByName("valueOf",false);
+        PsiMethod[] psiMethods = clazz.findMethodsByName("of",false);
         for (PsiMethod method : psiMethods){
             method.delete();
         }
 
-        PsiMethod psiMethod = psiElementFactory.createMethodFromText("public static " + clazz.getName() +" valueOf(" + paramType +  " " + psiParameter.getName() +") {}",null);
+        PsiMethod psiMethod = psiElementFactory.createMethodFromText("public static " + clazz.getName() +" of(" + paramType +  " " + psiParameter.getName() +") {}",null);
 
         //创建foreach语句
         String text = "for("+ clazz.getName() + " " + clazz.getName().toLowerCase() + ":" + clazz.getName() + ".values()){"
